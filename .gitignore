@@ -1,0 +1,6 @@
+.vscode
+build
+dist
+fbx.egg-info
+*.pyd
+FbxCommon.py
