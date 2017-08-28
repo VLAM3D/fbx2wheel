@@ -1,11 +1,20 @@
+from __future__ import print_function
 from setuptools import setup, find_packages
 import pip
 import os
 import sys
 import io
+import platform
+from shutil import copyfile
 
 with io.open('README.rst', encoding="utf-8") as f:
     long_description = f.read()
+
+def check_copy(src, dst):    
+    if not os.path.exists(src):
+        raise RuntimeError('%s not found' % src)        
+    print('Copying %s to %s' % (src,dst))
+    copyfile(src, dst)
 
 # From https://github.com/skvark/opencv-python/blob/master/setup.py
 # This creates a list which is empty but returns a length of 1.
@@ -13,6 +22,16 @@ with io.open('README.rst', encoding="utf-8") as f:
 class EmptyListWithLength(list):
     def __len__(self):
         return 1
+
+if not ((sys.version_info[0] == 2 and sys.version_info[1] == 7) or
+        (sys.version_info[0] == 3 and sys.version_info[1] == 3)):
+    raise RuntimeError('No binaries available for Python %s.%s' % (sys.version_info[0], sys.version_info[1]) )
+
+machine2suffix = {'i386' : 'x86', 'AMD64' : 'x64'}
+src_folder = 'Python%s%s_%s' % (sys.version_info[0], sys.version_info[1], machine2suffix[platform.machine()])
+check_copy(os.path.join(src_folder, 'fbxsip.pyd'), os.path.join('./fbxsip', 'fbx.pyd'))
+check_copy(os.path.join(src_folder, 'fbx.pyd'), os.path.join('./fbx', 'fbx.pyd'))
+check_copy(os.path.join(src_folder, 'FbxCommon.py'), os.path.join('./fbx', 'FbxCommon.py'))
 
 package_data = {}
 package_data['fbxsip'] = ['fbxsip.pyd']
